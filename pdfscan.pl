@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #Perl script to watch a folder for new pdf files, email them,
-#and backup them
+#and back them up
 
 #Script qui vérifie la présence de fichiers pdf dans un folder,
 #envoie par email et backup les fichiers trouvés
@@ -52,7 +52,7 @@ sub sendnewfiles{
             To      => $mailaddr,
             Subject => qq{Scanned Document: $_},
             Type    => q{TEXT},
-            Data    => q{Vous trouverez votre document en piece jointe. Si ce n'est pas le cas, insultez moi: freezeeedos@gmail.com}
+            Data    => q{Here are your scanned documents. If not, contact your admin.}
             );
             $msg->attach(
             Type     => q{application/pdf},
