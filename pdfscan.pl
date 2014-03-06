@@ -13,6 +13,7 @@ my $lockfile = qq{/tmp/pdfscanlock};
 
 #Si une autre instance du script tourne deja, on quitte.
 if(-e $lockfile){
+    print qq{Lockfile "$lockfile" exists. This script is already running, or something has gone wrong.\n};
     exit;
 }
 
