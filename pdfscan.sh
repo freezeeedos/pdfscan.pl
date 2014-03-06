@@ -2,6 +2,6 @@
 
 while true
 do
-    sleep 3
+    sleep 120
     perl /root/pdfscan.pl
 done
