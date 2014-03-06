@@ -7,15 +7,11 @@
 use strict;
 use MIME::Lite;
 use File::Copy;
+use Fcntl qw(:flock SEEK_END);
 
 my $lock;
 my $lockfile = qq{/tmp/pdfscanlock};
 
-#Si une autre instance du script tourne deja, on quitte.
-if(-e $lockfile){
-    print qq{Lockfile "$lockfile" exists. This script is already running, or something has gone wrong.\n};
-    exit;
-}
 
 #Subroutine qui email et backup les fichiers. Elle prends 2 arguments:
 #le username UNIX et une addresse mail.
@@ -67,11 +63,20 @@ sub sendnewfiles{
     }
 }
 
+#Si une autre instance du script tourne deja, on quitte.
+#if(-e $lockfile){
+#    print qq{Lockfile "$lockfile" exists. This script is already running, or something has gone wrong.\n};
+#    exit;
+#}
 #on créé notre "lockfile".
-open($lock, '>', $lockfile) or die(qq{can't open lockfile: $!\n});
-close($lock);
-#on balance la sauce.
-sendnewfiles(q{username},q{username@example.com});
-#On vire le lockfile.
-unlink($lockfile);
+
+open($lock, '>', $lockfile) or die qq{can't open lockfile: $!\n};
+flock($lock, LOCK_EX|LOCK_NB) or die "$0 already running! $!\n";
+
+while(1){
+    sleep(1);
+    
+    #on balance la sauce.
+    sendnewfiles(q{quentin},q{root@localhost});
+}
 __END__
