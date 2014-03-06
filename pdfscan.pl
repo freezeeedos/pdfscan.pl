@@ -12,6 +12,7 @@ use Fcntl qw(:flock SEEK_END);
 my $lock;
 my $lockfile = qq{/tmp/pdfscanlock};
 
+open(STDOUT, '>>', qq{/var/log/}.$0.time.qq{.log});
 
 #Subroutine qui email et backup les fichiers. Elle prends 2 arguments:
 #le username UNIX et une addresse mail.
@@ -29,7 +30,9 @@ sub sendnewfiles{
     #Ici on décrète que les home sont dans /home. A mettre à jour éventuellement avec une variable d'environnement.
     $folder = qq{/home/$user/pdfscan/};
     #On créé le folder de destination des documents scannés
-    mkdir($folder, 0700);
+    if(! -d $folder){
+        mkdir($folder, 0700) or return;
+    }
     #On chope les infos du user
     ($login,$pass,$uid,$gid) = getpwnam($user);
     #On rends le user propriétaire du folder
@@ -58,7 +61,8 @@ sub sendnewfiles{
             );
             $msg->send;
             move(qq{$folder/$_},qq{$folder/$_.bak});
-            print qq{$mailaddr\n$user\n$folder\n};
+            my $time = scalar(localtime(time));
+            print qq{$time: $mailaddr\n$time: $user\n$time: $folder\n};
         }
     }
 }
@@ -71,7 +75,7 @@ sub sendnewfiles{
 #on créé notre "lockfile".
 
 open($lock, '>', $lockfile) or die qq{can't open lockfile: $!\n};
-flock($lock, LOCK_EX|LOCK_NB) or die "$0 already running! $!\n";
+flock($lock, LOCK_EX|LOCK_NB) or die qq{$0 already running! $!\n};
 
 while(1){
     sleep(1);
