@@ -8,6 +8,7 @@ use strict;
 use MIME::Lite;
 use File::Copy;
 use Fcntl qw(:flock SEEK_END);
+use File::HomeDir;
 
 my $lock;
 my $lockfile = qq{/tmp/pdfscanlock};
@@ -27,10 +28,12 @@ sub sendnewfiles{
     my $pass;
     my @array;
     my $time;
+    my $home;
 
     ($user,$mailaddr) = @_;
-    #Ici on décrète que les home sont dans /home. A mettre à jour éventuellement avec une variable d'environnement.
-    $folder = qq{/home/$user/pdfscan/};
+    $home = File::HomeDir->users_home($user);
+    $folder = qq{$home/pdfscan/};
+
     #On créé le folder de destination des documents scannés
     if(! -d $folder){
         mkdir($folder, 0700) or return;
@@ -72,13 +75,7 @@ sub sendnewfiles{
     }
 }
 
-#Si une autre instance du script tourne deja, on quitte.
-#if(-e $lockfile){
-#    print qq{Lockfile "$lockfile" exists. This script is already running, or something has gone wrong.\n};
-#    exit;
-#}
 #on créé notre "lockfile".
-
 open($lock, '>', $lockfile) or die qq{can't open lockfile: $!\n};
 flock($lock, LOCK_EX|LOCK_NB) or die qq{$0 already running! $!\n};
 
