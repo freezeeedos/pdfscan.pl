@@ -26,6 +26,8 @@ sub sendnewfiles{
     my $login;
     my $pass;
     my @array;
+    my $time;
+
     ($user,$mailaddr) = @_;
     #Ici on décrète que les home sont dans /home. A mettre à jour éventuellement avec une variable d'environnement.
     $folder = qq{/home/$user/pdfscan/};
@@ -45,6 +47,9 @@ sub sendnewfiles{
     foreach( @array ){
         #Si ya des fichier .pdf on les email au user et on les backup
         if( $_ =~ /.*\.pdf$/ ){
+            $time = scalar(localtime(time));
+            print qq{$time: New document found.\n};
+            print qq{$time: $mailaddr\n$time: $user\n$time: $folder\n};
             #On créé le message à envoyer. Ce truc est génial, il utilise le mailer du systeme;
             #Par défaut sendmail.
             my $msg = MIME::Lite->new(
@@ -61,8 +66,8 @@ sub sendnewfiles{
             );
             $msg->send;
             move(qq{$folder/$_},qq{$folder/$_.bak});
-            my $time = scalar(localtime(time));
-            print qq{$time: $mailaddr\n$time: $user\n$time: $folder\n};
+            $time = scalar(localtime(time));
+            print qq{$time: Document sent.\n};
         }
     }
 }
