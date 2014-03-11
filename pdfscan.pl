@@ -13,7 +13,7 @@ use File::HomeDir;
 my $lock;
 my $lockfile = qq{/tmp/pdfscanlock};
 
-open(STDOUT, '>>', qq{/var/log/}.$0.time.qq{.log});
+open(STDOUT, '>>', qq{/var/log/}.$0.qq{.log});
 
 #Subroutine qui email et backup les fichiers. Elle prends 2 arguments:
 #le username UNIX et une addresse mail.
