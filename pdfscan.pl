@@ -11,19 +11,38 @@ use Fcntl qw(:flock SEEK_END);
 use File::HomeDir;
 
 my $lock;
+my $conf;
 my $lockfile = qq{/tmp/pdfscanlock};
+my $config_file = qq{/etc/pdfscan.conf};
+my %users;
 
 open(STDOUT, '>>', qq{/var/log/}.$0.qq{.log});
 
 #on créé notre "lockfile"
 open($lock, '>', $lockfile) or die qq{can't open lockfile: $!\n};
 flock($lock, LOCK_EX|LOCK_NB) or die qq{$0 already running! $!\n};
+#On lis la config
+open($conf, '<', $config_file) or die qq{can't open config file: $!\n};
+
+while(<$conf>){
+    chomp;
+#    poor man's config file parsing.
+    if($_ !~ m/^\s*#/){
+        my ($key, $val) = split /\s/;
+        $users{$key} = $val;
+    }
+}
+
+
 
 while(1){
     sleep(1);
     
-    #on balance la sauce.
-    sendnewfiles(q{quentin},q{root@localhost});
+    while (my($key, $val) = each(%users))
+    {
+        #on balance la sauce.
+        sendnewfiles($key,$val);
+    }
 }
 
 
@@ -43,7 +62,7 @@ sub sendnewfiles{
     my $home;
 
     ($user,$mailaddr) = @_;
-    $home = File::HomeDir->users_home($user);
+    $home = File::HomeDir->users_home($user) or return;
     $folder = qq{$home/pdfscan/};
 
     #On créé le folder de destination des documents scannés
