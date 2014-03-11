@@ -15,6 +15,18 @@ my $lockfile = qq{/tmp/pdfscanlock};
 
 open(STDOUT, '>>', qq{/var/log/}.$0.qq{.log});
 
+#on créé notre "lockfile"
+open($lock, '>', $lockfile) or die qq{can't open lockfile: $!\n};
+flock($lock, LOCK_EX|LOCK_NB) or die qq{$0 already running! $!\n};
+
+while(1){
+    sleep(1);
+    
+    #on balance la sauce.
+    sendnewfiles(q{quentin},q{root@localhost});
+}
+
+
 #Subroutine qui email et backup les fichiers. Elle prends 2 arguments:
 #le username UNIX et une addresse mail.
 sub sendnewfiles{
@@ -75,14 +87,4 @@ sub sendnewfiles{
     }
 }
 
-#on créé notre "lockfile".
-open($lock, '>', $lockfile) or die qq{can't open lockfile: $!\n};
-flock($lock, LOCK_EX|LOCK_NB) or die qq{$0 already running! $!\n};
-
-while(1){
-    sleep(1);
-    
-    #on balance la sauce.
-    sendnewfiles(q{quentin},q{root@localhost});
-}
 __END__
