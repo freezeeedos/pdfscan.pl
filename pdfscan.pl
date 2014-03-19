@@ -13,10 +13,11 @@ use File::HomeDir;
 my $lock;
 my $conf;
 my $lockfile = qq{/tmp/pdfscanlock};
+my $logfile = qq{/var/log/pdfscan.pl.log};
 my $config_file = qq{/etc/pdfscan.conf};
 my %users;
 
-open(STDOUT, '>>', qq{/var/log/}.$0.qq{.log}) or die qq{can't open log file: $!\n};
+open(STDOUT, '>>', $logfile) or die qq{can't open log file: $!\n};
 
 #on créé notre "lockfile"
 open($lock, '>', $lockfile) or die qq{can't open lockfile: $!\n};
