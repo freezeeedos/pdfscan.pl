@@ -16,7 +16,7 @@ my $lockfile = qq{/tmp/pdfscanlock};
 my $config_file = qq{/etc/pdfscan.conf};
 my %users;
 
-open(STDOUT, '>>', qq{/var/log/}.$0.qq{.log});
+open(STDOUT, '>>', qq{/var/log/}.$0.qq{.log}) or die qq{can't open log file: $!\n};
 
 #on créé notre "lockfile"
 open($lock, '>', $lockfile) or die qq{can't open lockfile: $!\n};
