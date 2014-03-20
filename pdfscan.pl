@@ -14,10 +14,12 @@ my $lock;
 my $conf;
 my $lockfile = qq{/tmp/pdfscanlock};
 my $logfile = qq{/var/log/pdfscan.pl.log};
+my $errfile = qq{/var/log/pdfscan.pl.err};
 my $config_file = qq{/etc/pdfscan.conf};
 my %users;
 
 open(STDOUT, '>>', $logfile) or die qq{can't open log file: $!\n};
+open(STDERR, '>>', $errfile) or die qq{can't open log file: $!\n};
 
 #on créé notre "lockfile"
 open($lock, '>', $lockfile) or die qq{can't open lockfile: $!\n};
@@ -42,7 +44,7 @@ while(1){
     while (my($key, $val) = each(%users))
     {
         #on balance la sauce.
-        sendnewfiles($key,$val);
+        sendnewfiles($key,$val,$logfile);
     }
 }
 
@@ -62,7 +64,7 @@ sub sendnewfiles{
     my $time;
     my $home;
 
-    ($user,$mailaddr) = @_;
+    ($user,$mailaddr, $logfile) = @_;
     $home = File::HomeDir->users_home($user) or return;
     $folder = qq{$home/pdfscan/};
 
@@ -82,6 +84,9 @@ sub sendnewfiles{
     foreach( @array ){
         #Si ya des fichier .pdf on les email au user et on les backup
         if( $_ =~ /.*\.pdf$/ ){
+            if(! -e $logfile){
+                open(STDOUT, '>>', $logfile) or die qq{can't open log file: $!\n};
+            }
             $time = scalar(localtime(time));
             print qq{$time: New document found.\n};
             print qq{$time: $mailaddr\n$time: $user\n$time: $folder\n};
@@ -99,7 +104,7 @@ sub sendnewfiles{
             Path     => qq{$folder/$_},
             Filename => $_
             );
-            $msg->send;
+            $msg->send() or warn qq{failed to send message: $!\n};
             move(qq{$folder/$_},qq{$folder/$_.bak});
             $time = scalar(localtime(time));
             print qq{$time: Document sent.\n};
